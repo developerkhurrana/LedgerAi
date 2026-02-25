@@ -1,11 +1,13 @@
 import { getServerSession } from '@/lib/auth';
 import { listTransactions } from '@/app/actions/transactions';
 import { TransactionListView } from '@/components/dashboard/TransactionListView';
+import { TransactionFilters } from '@/components/dashboard/TransactionFilters';
 import { MonthPicker } from '@/components/dashboard/MonthPicker';
 import { startOfMonth, endOfMonth } from 'date-fns';
+import type { TransactionType } from '@/lib/db';
 
 interface PageProps {
-  searchParams: Promise<{ year?: string; month?: string }>;
+  searchParams: Promise<{ year?: string; month?: string; search?: string; type?: string; category?: string }>;
 }
 
 export default async function TransactionsPage({ searchParams }: PageProps) {
@@ -24,6 +26,9 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
     userId,
     from: start.toISOString(),
     to: end.toISOString(),
+    search: params.search?.trim() || undefined,
+    type: (params.type === 'income' || params.type === 'expense' ? params.type : undefined) as TransactionType | undefined,
+    category: params.category?.trim() || undefined,
     limit: 100,
   });
 
@@ -50,6 +55,13 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
         </div>
         <MonthPicker currentYear={year} currentMonth={month} basePath="/transactions" />
       </div>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+          Search & filter
+        </h2>
+        <TransactionFilters currentYear={year} currentMonth={month} />
+      </section>
 
       <section className="space-y-4">
         <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">

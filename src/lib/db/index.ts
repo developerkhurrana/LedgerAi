@@ -5,3 +5,5 @@ export { Transaction } from './models/Transaction';
 export type { ITransaction, TransactionType } from './models/Transaction';
 export { InsightCache } from './models/InsightCache';
 export type { IInsightCache } from './models/InsightCache';
+export { TransactionTemplate } from './models/TransactionTemplate';
+export type { ITransactionTemplate } from './models/TransactionTemplate';

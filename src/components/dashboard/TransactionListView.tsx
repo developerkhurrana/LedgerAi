@@ -1,11 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/format';
-import { ListOrdered, Trash2 } from 'lucide-react';
+import { ListOrdered, Pencil, Trash2 } from 'lucide-react';
 import { deleteTransaction } from '@/app/actions/transactions';
 
 export interface TransactionItem {
@@ -81,6 +82,19 @@ export function TransactionListView({ userId, transactions }: Props) {
                       <p className="text-xs text-muted-foreground">GST {formatCurrency(t.gstAmount, t.currency)}</p>
                     )}
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+                    disabled={isPending}
+                    asChild
+                    aria-label="Edit transaction"
+                  >
+                    <Link href={`/transactions/${t.id}/edit`}>
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
                   <Button
                     type="button"
                     variant="ghost"
