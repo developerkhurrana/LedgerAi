@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Telegram-inspired theme: clean blues, flat surfaces */
+@layer base {
+  :root {
+    --background: 0 0% 99%;
+    --foreground: 220 15% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 12%;
+    --primary: 199 73% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 15% 20%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 199 40% 94%;
+    --accent-foreground: 199 73% 40%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 199 73% 53%;
+    --radius: 0.75rem;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 12%;
+  }
+
+  /* Telegram-style dark: dark blue-grey background, vibrant blue accent */
+  .dark {
+    --background: 210 28% 13%;
+    --foreground: 210 14% 98%;
+    --card: 210 26% 16%;
+    --card-foreground: 210 14% 98%;
+    --primary: 199 89% 55%;
+    --primary-foreground: 210 28% 13%;
+    --secondary: 210 24% 20%;
+    --secondary-foreground: 210 14% 98%;
+    --muted: 210 24% 20%;
+    --muted-foreground: 210 14% 72%;
+    --accent: 199 50% 28%;
+    --accent-foreground: 199 89% 65%;
+    --destructive: 0 55% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 22% 24%;
+    --input: 210 22% 24%;
+    --ring: 199 89% 55%;
+    --popover: 210 28% 13%;
+    --popover-foreground: 210 14% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply overflow-x-hidden;
+  }
+  body {
+    @apply bg-background text-foreground overflow-x-hidden;
+  }
+}
