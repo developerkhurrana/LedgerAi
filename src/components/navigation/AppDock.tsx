@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Receipt, Lightbulb, User } from 'lucide-react';
+import { LayoutDashboard, Receipt, Lightbulb, MessageCircle, User } from 'lucide-react';
 import { AddDockButton } from './AddDockButton';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/transactions', icon: Receipt, label: 'Transactions' },
   { href: '/insights', icon: Lightbulb, label: 'Insights' },
+  { href: '/chat', icon: MessageCircle, label: 'AI Expert' },
   { href: '/profile', icon: User, label: 'Profile' },
 ] as const;
 

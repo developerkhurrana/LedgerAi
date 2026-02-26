@@ -20,7 +20,7 @@ Track tasks and next steps. Check off as you go.
 - [ ] **Export** – Export month’s transactions (CSV and/or PDF)
 - [x] **Search / filter transactions** – Search by vendor/invoice; filter by type, category, date range
 - [ ] **Password reset** – “Forgot password?” flow with email link
-- [ ] **GST due reminder** – Banner or notice on dashboard when GST filing is due
+- [x] **GST due reminder** – Banner or notice on dashboard when GST filing is due
 - [x] **Recurring templates** – Save transaction as template, “Add from template” for rent, subscriptions, etc.
 
 ---

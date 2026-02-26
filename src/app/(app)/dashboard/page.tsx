@@ -3,6 +3,7 @@ import { getServerSession } from '@/lib/auth';
 import { getDashboardMetrics } from '@/app/actions/insights';
 import { formatCurrency } from '@/lib/format';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { GstDueBanner } from '@/components/dashboard/GstDueBanner';
 import {
   LayoutDashboard,
   Receipt,
@@ -41,6 +42,8 @@ export default async function DashboardPage() {
           Your financial overview and quick links.
         </p>
       </div>
+
+      <GstDueBanner />
 
       {metrics && (
         <section>
