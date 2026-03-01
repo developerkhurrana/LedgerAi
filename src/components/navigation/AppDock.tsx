@@ -5,6 +5,11 @@ import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Receipt, Lightbulb, MessageCircle, User } from 'lucide-react';
 import { AddDockButton } from './AddDockButton';
+import {
+  GlassFilter,
+  liquidGlassShadowClass,
+  liquidGlassShadowDarkClass,
+} from '@/components/ui/liquid-glass-button';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -26,14 +31,27 @@ export function AppDock() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 120 }}
-        className="relative mx-auto flex max-w-4xl items-center justify-between rounded-[32px] border border-white/20 bg-white/10 px-6 py-4 shadow-[0_10px_40px_rgba(0,0,0,0.25)] backdrop-blur-xl dark:border-white/10 dark:bg-white/5 sm:px-10"
+        className="relative mx-auto flex max-w-4xl items-center justify-between rounded-[32px] border border-white/20 bg-white/10 px-6 py-4 backdrop-blur-xl dark:border-white/10 dark:bg-white/5 sm:px-10"
       >
+        {/* Liquid glass shadow layer */}
+        <div
+          className={`pointer-events-none absolute inset-0 rounded-[32px] ${liquidGlassShadowClass} ${liquidGlassShadowDarkClass}`}
+          aria-hidden
+        />
+        {/* Liquid glass backdrop filter */}
+        <div
+          className="pointer-events-none absolute inset-0 isolate -z-10 overflow-hidden rounded-[32px]"
+          style={{ backdropFilter: 'url("#container-glass")' }}
+          aria-hidden
+        />
+        <GlassFilter />
         {/* Glass shine layer */}
         <div
           className="pointer-events-none absolute inset-0 rounded-[32px] bg-gradient-to-b from-white/30 to-transparent opacity-20 dark:from-white/20"
           aria-hidden
         />
 
+        <div className="relative z-10 flex flex-1 items-center justify-between">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -72,6 +90,7 @@ export function AppDock() {
 
         <div className="relative flex items-center justify-center">
           <AddDockButton />
+        </div>
         </div>
       </motion.div>
     </nav>
