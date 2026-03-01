@@ -1,85 +1,111 @@
 # LedgerAI – Summary of Recent Changes
 
-Summary of features and fixes implemented in this session.
+Summary of features and fixes implemented so far.
 
 ---
 
 ## Navigation & Dock
 
 ### Bottom dock (liquid style)
-- Replaced the previous dock with a **floating liquid-style dock** (Framer Motion).
-- Dock shows: **Dashboard**, **Transactions**, **Insights**, **Profile**, and **Add** (no longer Settings).
+- **Floating liquid-style dock** (Framer Motion) with **liquid glass effect**: same inset shadows and SVG backdrop filter as the liquid glass button component for a consistent frosted-glass look.
+- Dock shows: **Dashboard**, **Transactions**, **Insights**, **AI Expert**, **Profile**, and **Add** (Settings is in the header only).
 - Active route has a glowing pill and primary-colored icon; tap/hover animations.
-- **Width**: Dock spans most of the screen with horizontal padding, `max-w-4xl`, and `justify-between` so items are spaced across the bar.
+- **Width**: Dock spans most of the screen with horizontal padding, `max-w-4xl`, and `justify-between`.
 
-### Add button (no direct jump)
-- The **Add** item in the dock is a **button** that opens a **popover above it** (no immediate navigation).
-- Popover options:
-  - **Manually** → navigates to `/add` (manual transaction form).
-  - **Upload** → navigates to `/add?upload=1` (add page opens with file picker for PDF).
+### Add button (popover)
+- The **Add** item is a **button** that opens a **popover above it**.
+- **Manually** → `/add` (manual form). **Upload** → `/add?upload=1` (file picker opens).
 - Implemented in `AddDockButton.tsx`; click-outside closes the popover.
 
 ### Dock hidden on onboarding
-- **DockWhenNotOnboarding** component: dock is **not rendered** on `/onboarding`.
-- On all other app routes the dock is shown as usual.
+- **DockWhenNotOnboarding**: dock is not rendered on `/onboarding`.
 
-### Settings access
-- **Settings** was removed from the dock and is only in the **header** (gear icon, primary styling).
-- Header Settings button was made more visible: `text-primary`, and on larger screens `sm:bg-primary/10` so it reads clearly on the dark header.
+### Settings
+- Settings is in the **header** only (gear icon, `text-primary`, `sm:bg-primary/10` for visibility).
 
 ---
 
 ## Add / Transactions Flow
 
-### Dedicated Add page
-- **Route**: `/add`.
-- Contains only: **Add transaction** form and **Upload invoice** (PDF).
-- **Transactions** page (`/transactions`) no longer has “Quick actions”; it only shows the month picker and the transaction list.
-
-### Redirect after successful add
-- After **manually** adding a transaction: redirect to **`/transactions`** (no longer stay on `/add`).
-- After **uploading** an invoice successfully: redirect to **`/transactions`**.
-- Implemented in `AddTransactionForm.tsx` and `InvoiceUpload.tsx`.
-
-### Upload from dock
-- Choosing **Upload** in the Add popover goes to `/add?upload=1`.
-- **InvoiceUpload** has optional prop **`autoOpenFileDialog`**; when `true` it opens the file picker on mount and then cleans the `upload` query from the URL.
+- **`/add`**: Add transaction form + Upload invoice (PDF). Templates list for “Add from template.”
+- **Transactions** page: month picker + transaction list (no add form; add is via dock).
+- **After add/upload**: Redirect to **`/transactions`**.
+- **Upload from dock**: `InvoiceUpload` has `autoOpenFileDialog` for `/add?upload=1`; opens file picker and cleans URL.
 
 ---
 
-## Onboarding
+## Edit Transaction
 
-### New-user onboarding
-- **User model**: added **`onboardingCompleted`** (boolean, default `false`).
-- **Session**: `onboardingCompleted` is read from the DB in the session callback and exposed on `session.user`.
-- **OnboardingGuard** (client): if the user is logged in and `onboardingCompleted` is `false`, redirects to **`/onboarding`** unless already there.
-- **Onboarding page** (`/onboarding`): welcome block, “What you can do” (transactions/GST, AI insights), optional “Quick setup” (name, business name), and **Get started** button.
-- **completeOnboarding** server action: sets `onboardingCompleted: true` and optionally saves name/business name; then user can access the rest of the app.
-- **Legacy users**: users without the `onboardingCompleted` field are treated as completed so they are not sent to onboarding.
+- **Server**: `getTransaction(userId, id)`, `updateTransaction(userId, id, input)` in `actions/transactions.ts`. Owner-only.
+- **UI**: **Edit** (pencil) on each transaction row → **`/transactions/[id]/edit`**. `EditTransactionForm` pre-filled from transaction; **Save as template** in header.
+- **Edit page**: Loads transaction; redirects to `/transactions` if not found. Save redirects to `/transactions`.
+
+---
+
+## Search & Filter Transactions
+
+- **Server**: `listTransactions` accepts **`search`** (vendor/invoice, case-insensitive regex) and **`category`** (exact). Date range via existing month picker.
+- **UI**: **TransactionFilters** on `/transactions`: search input + “Search” button, **Type** (All / Income / Expense), **Category** (All + list). Filters in URL (`?search=&type=&category=`); **Clear filters** resets them.
+- Month picker keeps search/type/category when changing month.
+
+---
+
+## Recurring Templates
+
+- **Model**: **TransactionTemplate** (userId, name, type, vendorName, amount, currency, gstPercent, category, invoiceNumber). No date (chosen when adding).
+- **Actions**: `createTemplate`, `listTemplates`, `getTemplate`, `deleteTemplate` in `actions/templates.ts`.
+- **Add page**: **TemplateList** (“Add from template”) with **Use** → `/add?template=id` and **Delete**. Form pre-fills from template via `initialData`; **key** resets form when template changes.
+- **AddTransactionForm**: Optional **`initialData`** and **Currency** (INR/USD) for templates.
+- **Save as template**: On **Edit transaction** page, **Save as template** in header; prompt for name → create template → redirect to `/add?template=newId`.
+
+---
+
+## GST Due Reminder
+
+- **GstDueBanner** on dashboard: shown **1st–20th** of each month (GSTR-3B due by 20th of next month).
+- Message: e.g. “GSTR-3B for January 2025 is due by 20 February 2025.” Links: **File on GST portal** (gst.gov.in), **View GST in LedgerAI** (`/overview`).
+- Amber banner with icon; not shown after the 20th.
+
+---
+
+## AI Expert Chat
+
+- **Route**: **`/chat`**. **Dock**: “AI Expert” (message icon) links to `/chat`.
+- **Backend**: `chatWithExpert(messages)` in `actions/chat.ts`; OpenAI with LedgerAI expert system prompt (app usage, GST, finances, troubleshooting). Uses `gpt-4o-mini`.
+- **UI**: **ChatExpert** – single heading “AI Expert” with sparkle icon; welcome “How can I help you today?”; message list (user right, assistant left); input with visible text/placeholder (`text-foreground`, `placeholder:text-foreground/60`); send button. No back arrow (navigate via dock/header).
+- **State**: In-memory per session; no persistence yet.
 
 ---
 
 ## Insights
 
-### Caching
-- **InsightCache** model: stores cached insights per user/month with a fingerprint (transaction count + last transaction `updatedAt`).
-- **getMonthlyInsights**: checks cache first; calls OpenAI only when the month’s transactions have changed; otherwise returns cached insights.
-- Reduces repeated OpenAI calls and speeds up repeat visits to Insights.
+- **InsightCache** model; **getMonthlyInsights** uses cache; OpenAI only when month’s transactions change.
+- **Insights loading**: `loading.tsx` skeleton.
 
-### Loading state
-- **Insights loading**: `loading.tsx` with a skeleton (header, month picker placeholder, card with skeleton insight rows) while server fetches or uses cached insights.
+---
+
+## Liquid Glass UI
+
+- **`components/ui/liquid-glass-button.tsx`**:
+  - **LiquidButton**: Glass effect (inset shadows + SVG `#container-glass` filter). Variants/sizes. **GlassFilter** (exported) provides the filter SVG.
+  - **MetalButton**: Metallic look with variants (default, primary, success, error, gold, bronze); press/hover states; touch-aware.
+  - **Exports**: `GlassFilter`, `liquidGlassShadowClass`, `liquidGlassShadowDarkClass` for reuse.
+- **Dock**: AppDock uses the same liquid glass layers (shadow classes + backdrop filter + GlassFilter) on the dock pill for a consistent look.
+- **Demo**: **`/demo`** shows LiquidButton and MetalButton variants (link from dashboard or go to `/demo`).
 
 ---
 
 ## UI Polish
 
-### Dashboard Quick links
-- Quick link cards use a **strict grid**: `grid-cols-[2.5rem_1fr_auto]` so icon, text, and arrow align across all four cards.
-- **Min height** on the card header so all quick link cards have consistent height.
-- Consistent padding (`py-4 sm:py-5`), `text-left`, and `leading-tight` / `leading-snug` for aligned, readable layout.
+- **Dashboard Quick links**: Grid `grid-cols-[2.5rem_1fr_auto]`, min height, consistent padding and alignment.
+- **Session**: `next-auth.d.ts` – `Session.user.onboardingCompleted`.
 
-### Session types
-- **next-auth.d.ts**: `Session.user` extended with **`onboardingCompleted?: boolean`**.
+---
+
+## Onboarding
+
+- **User**: `onboardingCompleted` (default `false`). **Session**: exposes it; legacy users (no field) skip onboarding.
+- **OnboardingGuard**: redirects to `/onboarding` when not completed. **Onboarding page**: welcome, “What you can do,” optional Quick setup (name, business), **Get started**. **completeOnboarding** action.
 
 ---
 
@@ -87,12 +113,17 @@ Summary of features and fixes implemented in this session.
 
 | Area            | Files / routes |
 |-----------------|----------------|
-| Dock            | `AppDock.tsx`, `AddDockButton.tsx`, `DockWhenNotOnboarding.tsx` |
+| Dock            | `AppDock.tsx`, `AddDockButton.tsx`, `DockWhenNotOnboarding.tsx`; liquid glass from `liquid-glass-button.tsx` |
+| Add flow        | `(app)/add/page.tsx`, `AddTransactionForm.tsx`, `InvoiceUpload.tsx`, `TemplateList.tsx` |
+| Transactions    | `(app)/transactions/page.tsx`, `TransactionFilters.tsx`, `TransactionListView.tsx`; edit: `(app)/transactions/[id]/edit/page.tsx`, `EditTransactionForm.tsx` |
+| Templates       | `TransactionTemplate.ts`, `actions/templates.ts` |
+| Insights        | `InsightCache.ts`, `actions/insights.ts`, `(app)/insights/loading.tsx` |
+| Chat            | `(app)/chat/page.tsx`, `ChatExpert.tsx`, `actions/chat.ts` |
+| Dashboard       | `(app)/dashboard/page.tsx`, `GstDueBanner.tsx` |
 | Onboarding      | `(app)/onboarding/page.tsx`, `OnboardingFlow.tsx`, `OnboardingGuard.tsx`, `actions/onboarding.ts` |
-| Add flow        | `(app)/add/page.tsx`, `AddTransactionForm.tsx`, `InvoiceUpload.tsx` (with `autoOpenFileDialog`) |
-| Insights        | `InsightCache.ts`, `getMonthlyInsights` in `actions/insights.ts`, `(app)/insights/loading.tsx` |
-| Layout / auth   | `(app)/layout.tsx` (OnboardingGuard, DockWhenNotOnboarding, header Settings), `lib/auth/config.ts` (session + onboardingCompleted), `User.ts` (onboardingCompleted) |
+| UI              | `components/ui/liquid-glass-button.tsx` (LiquidButton, MetalButton, GlassFilter, shadow classes) |
+| Layout / auth   | `(app)/layout.tsx`, `lib/auth/config.ts`, `User.ts` |
 
 ---
 
-*Generated as a summary of the session’s work.*
+*Last updated to include edit transaction, search/filter, templates, GST reminder, AI Expert chat, liquid glass component and dock integration.*

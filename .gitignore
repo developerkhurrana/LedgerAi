@@ -46,3 +46,6 @@ coverage
 
 # Misc
 *.pem
+
+# Interview prep (local only — do not commit)
+INTERVIEW_PREP.md
